@@ -1,0 +1,3 @@
+﻿  ACRead.cpp
+C:\Users\rnguy\source\repos\ACRead\ACRead\ACRead.cpp(25,10): warning C4101: 'health': unreferenced local variable
+  ACRead.vcxproj -> C:\Users\rnguy\source\repos\ACRead\x64\Debug\ACRead.exe

@@ -6,17 +6,17 @@ namespace Memory {
 
 	Mem::Mem(HANDLE hProcess) : hProcess(hProcess) {};
 
-	template <typename T> BOOL Mem::WPM(LPVOID BASE_ADDRESS, const T& value) {
+	template <typename T> BOOL Mem::WPM(int BASE_ADDRESS, const T& buffer) {
 		SIZE_T bytez;
-		BOOL result = WriteProcessMemory(this->hProcess, BASE_ADDRESS, value, sizeof(value), &bytez);
+		BOOL result = WriteProcessMemory(this->hProcess, (LPCVOID)BASE_ADDRESS, buffer, sizeof(buffer), &bytez);
 
 		return result && (bytez == sizeof(buffer));
 	}
 
-	template <typename T> T Mem::RPM(LPVOID BASE_ADDRESS) {
+	template <typename T> T Mem::RPM(int BASE_ADDRESS) {
 		T result;
 		SIZE_T bytez;
-		BOOL result = ReadProcessMemory(this->hProcess, BASE_ADDRESS, &result, sizeof(T), &bytez);
+		BOOL result = ReadProcessMemory(this->hProcess, (LPCVOID)BASE_ADDRESS, &result, sizeof(T), &bytez);
 
 		return result;
 	}

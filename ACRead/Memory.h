@@ -4,11 +4,11 @@
 namespace Memory {
 	class Mem {
 	private:
-		Mem(HANDLE hProcess);
 		HANDLE hProcess;
 	public:
-		template <typename T> BOOL WPM(LPVOID BASE_ADDRESS, const T& value);
-		template <typename T> T RPM(LPVOID BASE_ADDRESS);
+		Mem(HANDLE hProcess);
+		template <typename T> BOOL WPM(int BASE_ADDRESS, const T& buffer);
+		template <typename T> T RPM(int BASE_ADDRESS);
 	};
 
 	DWORD GetProcessId(const wchar_t* processName);

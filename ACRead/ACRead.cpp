@@ -6,6 +6,7 @@
 #include <TlHelp32.h>
 #include "extra.h"
 #include "Memory.h"
+#include "offests.h"
 
 using namespace std;
 using namespace extra;
@@ -22,22 +23,29 @@ int main()
 
     //get pid
     DWORD pid;
-    //pid = GetProcessId("ac_client.exe");
+    HWND targetWindow = FindWindowW(NULL, L"AssaultCube");
+    GetWindowThreadProcessId(targetWindow, &pid);
+
+    cout << pid || "NO PID";
 
 
 
-    //get base address
+    ////get base address
+    //uintptr_t base_address;
+    //base_address = Memory::GetModuleBaseAddress(pid, L"ac_client.exe");
 
+    HANDLE openProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 
+    Memory::Mem memoryController(openProc);
 
-
-
-    //Mem memoryController();
     INT8 health;
-
-    Memory::Mem memoryController();
+    INT8 ammo;
 
     while (!GetAsyncKeyState(VK_ESCAPE)) {
+
+        health = memoryController.RPM<INT8>((OFFSET_PLAYERBASEADDRESS+PLAYER_HEALTH_OFFSET));
+
+        cout << "player health: " << health;
         Sleep(1);
     }
 }

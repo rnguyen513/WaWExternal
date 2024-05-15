@@ -6,21 +6,6 @@ namespace Memory {
 
 	Mem::Mem(HANDLE hProcess) : hProcess(hProcess) {};
 
-	template <typename T> BOOL Mem::WPM(int BASE_ADDRESS, const T& buffer) {
-		SIZE_T bytez;
-		BOOL result = WriteProcessMemory(this->hProcess, (LPCVOID)BASE_ADDRESS, buffer, sizeof(buffer), &bytez);
-
-		return result && (bytez == sizeof(buffer));
-	}
-
-	template <typename T> T Mem::RPM(int BASE_ADDRESS) {
-		T result;
-		SIZE_T bytez;
-		BOOL result = ReadProcessMemory(this->hProcess, (LPCVOID)BASE_ADDRESS, &result, sizeof(T), &bytez);
-
-		return result;
-	}
-
     // Utility function to find the process ID by the game's executable name
     DWORD GetProcessId(const wchar_t* processName) {
         PROCESSENTRY32 processInfo;
@@ -50,22 +35,42 @@ namespace Memory {
     }
 
     // Function to get the base address of the process by its PID
-    uintptr_t GetModuleBaseAddress(DWORD procId, const wchar_t* modName) {
-        uintptr_t modBaseAddr = 0;
-        HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
-        if (hSnap != INVALID_HANDLE_VALUE) {
-            MODULEENTRY32 modEntry;
-            modEntry.dwSize = sizeof(modEntry);
-            if (Module32First(hSnap, &modEntry)) {
+    //uintptr_t GetModuleBaseAddress(DWORD procId, const wchar_t* modName) {
+    //    uintptr_t modBaseAddr = 0;
+    //    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, procId);
+    //    if (hSnap != INVALID_HANDLE_VALUE) {
+    //        MODULEENTRY32 modEntry;
+    //        modEntry.dwSize = sizeof(modEntry);
+    //        if (Module32First(hSnap, &modEntry)) {
+    //            do {
+    //                if (!_wcsicmp(modEntry.szModule, modName)) {
+    //                    modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
+    //                    break;
+    //                }
+    //            } while (Module32Next(hSnap, &modEntry));
+    //        }
+    //    }
+    //    CloseHandle(hSnap);
+    //    return modBaseAddr;
+    //}
+
+    uintptr_t GetModuleBaseAddress(DWORD dwPid, const wchar_t* moduleName) {
+        uintptr_t dwBase = 0;
+        do {
+            HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, dwPid);
+            if (hSnapshot == INVALID_HANDLE_VALUE) { continue; }
+            MODULEENTRY32 ModuleEntry32;
+            ModuleEntry32.dwSize = sizeof(MODULEENTRY32);
+            if (Module32First(hSnapshot, &ModuleEntry32)) {
                 do {
-                    if (!_wcsicmp(modEntry.szModule, modName)) {
-                        modBaseAddr = (uintptr_t)modEntry.modBaseAddr;
+                    if (!_wcsicmp(ModuleEntry32.szModule, moduleName)) {
+                        dwBase = (DWORD)ModuleEntry32.modBaseAddr;
                         break;
                     }
-                } while (Module32Next(hSnap, &modEntry));
+                } while (Module32Next(hSnapshot, &ModuleEntry32));
             }
-        }
-        CloseHandle(hSnap);
-        return modBaseAddr;
+            CloseHandle(hSnapshot);
+        } while (!dwBase);
+        return dwBase;
     }
 }

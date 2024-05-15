@@ -7,13 +7,15 @@
 #include "extra.h"
 #include "Memory.h"
 #include "offests.h"
+#include <cstdlib>
 
-using namespace std;
 using namespace extra;
 
 int main()
 {
-    cout << "Staring client...\n";
+    std::cout << "Staring client...\n";
+
+    Sleep(1000);
 
     //Dog myDawg("dawggie", 14);
     //cout << myDawg.getName() << myDawg.getAge();
@@ -23,44 +25,60 @@ int main()
 
     //get pid
     DWORD pid;
-    HWND targetWindow = FindWindowW(NULL, L"AssaultCube");
+    HWND targetWindow = FindWindowW(NULL, L"Call of Duty®");
     GetWindowThreadProcessId(targetWindow, &pid);
 
-    cout << pid || "NO PID";
+    std::cout << pid << std::endl;
 
 
 
     ////get base address
-    //uintptr_t base_address;
-    //base_address = Memory::GetModuleBaseAddress(pid, L"ac_client.exe");
+    uintptr_t base_address;
+    base_address = Memory::GetModuleBaseAddress(pid, L"CoDWaW.exe");
+
+    std::cout << base_address << std::endl;
 
     HANDLE openProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 
     Memory::Mem memoryController(openProc);
 
-    INT8 health;
-    INT8 ammo;
+    //INT8 health;
+    //INT8 ammo;
+    int points;
+
+    viewMatrix mtx;
 
     while (!GetAsyncKeyState(VK_ESCAPE)) {
 
-        health = memoryController.RPM<INT8>((OFFSET_PLAYERBASEADDRESS+PLAYER_HEALTH_OFFSET));
+        //health = memoryController.RPM<INT8>((OFFSET_PLAYERBASEADDRESS+PLAYER_HEALTH_OFFSET));
 
-        cout << "player health: " << health;
-        Sleep(1);
+        //cout << "player health: " << health;
+
+        points = memoryController.RPM<int>(base_address + OFFSET_POINTS);
+
+        std::cout << "reading address: " << std::hex << "0x" << (base_address + OFFSET_POINTS);
+        std::cout << ", points: "<< std::dec << points << std::endl;
+
+        //entlist contains pointers to actual zombies
+        //zombie1 = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST));
+
+        int zombieCount = 0;
+        for (int i = 0; i < 24; i++) {
+            ent zombie = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST + 0x88 * i));
+            if (zombie.health > 0 && zombie.health < 50000 && zombie.health != 8304) {
+                zombieCount++;
+                std::cout << "zombie " << i << " health: " << zombie.health << ", position: "
+                    << zombie.pos.toString() << std::endl;
+            }
+        }
+
+        std::cout << "there are " << zombieCount << " zombies" << std::endl;
+
+        mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
+
+        std::cout << mtx.matrix[0].x << ", " << mtx.matrix[2].z << std::endl;
+
+        Sleep(1000);
+        system("cls");
     }
 }
-
-//get pid
-//get base address
-//rpm/wpm
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

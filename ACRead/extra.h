@@ -27,9 +27,9 @@ namespace extra {
 
 	bool WorldToScreen(Vector3 pos, Vector2& screen, float matrix[16], int windowWidth, int windowHeight);
 
-
-
 	void setVector3(float x, float y, float z, Vector3* ptr);
+
+	void DrawFilledRect(int x, int y, int w, int h, HDC hdc, HBRUSH brush);
 
 	class Dog {
 	private:

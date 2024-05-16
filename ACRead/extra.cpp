@@ -28,6 +28,12 @@ namespace extra {
 		return true;
 	}
 
+	void DrawFilledRect(int x, int y, int w, int h, HDC hdc, HBRUSH brush) {
+		RECT rect = { x, y, x + w, y + h };
+		FillRect(hdc, &rect, brush);
+		LineTo(hdc, x, y);
+	}
+
 	Dog::Dog(std::string name, int8_t age) : name(name), age(age) {};
 
 	void Dog::bark() const {

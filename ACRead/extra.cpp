@@ -11,76 +11,22 @@ namespace extra {
 		ptr->z = z;
 	}
 
-	struct Vector3 WorldToScreen(const struct Vector3 pos, struct viewMatrix matrix) {
-		struct Vector3 out;
-		float _x = matrix.matrix[0] * pos.x + matrix.matrix[1] * pos.y + matrix.matrix[2] * pos.z + matrix.matrix[3];
-		float _y = matrix.matrix[4] * pos.x + matrix.matrix[5] * pos.y + matrix.matrix[6] * pos.z + matrix.matrix[7];
-		out.z = matrix.matrix[12] * pos.x + matrix.matrix[13] * pos.y + matrix.matrix[14] * pos.z + matrix.matrix[15];
+	bool WorldToScreen(Vector3 pos, Vector2& screen, float matrix[16], int windowWidth, int windowHeight)
+	{
+		Vector4 clipCoords;
+		clipCoords.x = pos.x * matrix[0] + pos.y * matrix[1] + pos.z * matrix[2] + matrix[3];
+		clipCoords.y = pos.x * matrix[4] + pos.y * matrix[5] + pos.z * matrix[6] + matrix[7];
+		clipCoords.z = pos.x * matrix[8] + pos.y * matrix[9] + pos.z * matrix[10] + matrix[11];
+		clipCoords.w = pos.x * matrix[12] + pos.y * matrix[13] + pos.z * matrix[14] + matrix[15];
 
-		_x *= 1.f / out.z;
-		_y *= 1.f / out.z;
+		if (clipCoords.w < 0.1f) return false;
 
-		//int width = WBounds.right - WBounds.left;
-		//int height = WBounds.bottom + WBounds.left;
-
-		int width = 800;
-		int height = 600;
-
-		out.x = width * .5f;
-		out.y = height * .5f;
-
-		out.x += 0.5f * _x * width + 0.5f;
-		out.y -= 0.5f * _y * height + 0.5f;
-
-		return out;
+		Vector3 NDC;
+		NDC.x = clipCoords.x / clipCoords.w; NDC.y = clipCoords.y / clipCoords.w; NDC.z = clipCoords.z / clipCoords.w;
+		screen.x = (windowWidth / 2 * NDC.x) + (NDC.x + windowWidth / 2);
+		screen.y = -(windowHeight / 2 * NDC.y) + (NDC.y + windowHeight / 2);
+		return true;
 	}
-
-	Vector2 WTS(const Vector3& pos, const viewMatrix_t& mtx) {
-		float vectorHomogeneous[4] = { pos.x, pos.y, pos.z, 1.0f };
-
-		float vectorClip[4] = { 0 };
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				vectorClip[i] += mtx.matrix[i][j] * vectorHomogeneous[j];
-			}
-		}
-
-		float vectorNDC[3] = { 0 };
-		for (int i = 0; i < 3; i++) {
-			vectorNDC[i] = vectorClip[i] / vectorClip[3];
-		}
-
-		Vector2 screenVector;
-		screenVector.x = (vectorNDC[0] + 1.0f) * 0.5f * 800;
-		screenVector.y = (1.0f - vectorNDC[1]) * 0.5f * 600;
-
-		return screenVector;
-	}
-
-	//bool WorldToScreen(struct originvec vect2, struct vec2D& vOut, float* flMatrix)
-	//{
-	//	vOut.x = flMatrix[0] * vect2.x + flMatrix[1] * vect2.y + flMatrix[2] * vect2.z + flMatrix[3];
-	//	vOut.y = flMatrix[4] * vect2.x + flMatrix[5] * vect2.y + flMatrix[6] * vect2.z + flMatrix[7];
-	//	std::cout << vOut.x << std::endl;
-
-	//	float flTemp = flMatrix[12] * vect2.x + flMatrix[13] * vect2.y + flMatrix[14] * vect2.z + flMatrix[15];
-
-	//	std::cout << flTemp << std::endl;
-
-	//	if (flTemp < 0.01f)
-	//		return false;
-
-	//	float x = (float)res[0] / 2.f; // Your X resolution...
-	//	float y = (float)res[1] / 2.f; // Your Y resolution...
-
-	//	x += 0.5f * vOut.x * (float)res[0] + 0.5f;
-	//	y -= 0.5f * vOut.y * (float)res[1] + 0.5f;
-
-	//	vOut.x = x;
-	//	vOut.y = y;
-
-	//	return true;
-	//}
 
 	Dog::Dog(std::string name, int8_t age) : name(name), age(age) {};
 

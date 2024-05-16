@@ -1,5 +1,5 @@
-// ACRead.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+//ACRead.cpp : This file contains the 'main' function. Program execution begins and ends there.
+
 
 #include <iostream>
 #include <Windows.h>
@@ -17,8 +17,6 @@ int main()
     std::cout << "Staring client...\n";
 
     Sleep(1000);
-
-
 
 
     //get pid
@@ -41,8 +39,9 @@ int main()
     Memory::Mem memoryController(openProc);
 
     int points;
+
+
     viewMatrix mtx;
-    viewMatrix_t mtx2;
 
 
     //initialize glfw
@@ -55,7 +54,7 @@ int main()
     glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GLFW_TRUE);
     glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
-    window = glfwCreateWindow(800,600, "Clear Sight", NULL, NULL);
+    window = glfwCreateWindow(800,600, "Clear SSSSSSight", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -65,11 +64,15 @@ int main()
 
     RECT windowPos;
 
-    while (!GetAsyncKeyState(VK_ESCAPE)) {
+    while (!GetAsyncKeyState(VK_END)) {
 
         //overlay window stuff
         GetWindowRect(targetWindow, &windowPos);
-        glfwSetWindowPos(window, windowPos.left+3, windowPos.top+25);
+        glfwSetWindowPos(window, windowPos.left, windowPos.top);
+        int height = windowPos.bottom - windowPos.top;
+        int width = windowPos.right - windowPos.left;
+        glfwSetWindowSize(window, width, height);
+
         //glfwSetWindowOpacity(window, 0.5f);
 
         glClear(GL_COLOR_BUFFER_BIT);
@@ -80,11 +83,7 @@ int main()
         std::cout << "reading address: " << std::hex << "0x" << (base_address + OFFSET_POINTS);
         std::cout << ", points: "<< std::dec << points << std::endl;
 
-        //entlist contains pointers to actual zombies
-        //zombie1 = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST));
-
         mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
-        mtx2 = memoryController.RPM<viewMatrix_t>(VWMATRIX);
 
         int zombieCount = 0;
         for (int i = 0; i < 24; i++) {
@@ -94,48 +93,20 @@ int main()
                 std::cout << "zombie " << i << " health: " << zombie.health << ", position: "
                     << zombie.pos.toString() << std::endl;
 
-                Vector3 zombieWTS = WorldToScreen(zombie.pos, mtx);
-
-                std::cout << "ZOMBIE REGULAR VEC3: " << zombie.pos.toString() << std::endl;
-                std::cout << "ZOMBIEWTS: " << zombieWTS.toString() << std::endl;
-
-                Vector2 zombieWTS2 = WTS(zombie.pos, mtx2);
-                std::cout << "NEW WTS: " << zombieWTS2.x << ", " << zombieWTS2.y << std::endl;
-
-                if (zombieWTS.z < 0.01f) continue;
+                Vector2 zombieScreen;
+                WorldToScreen(zombie.pos, zombieScreen, mtx.matrix, width, height);
 
                 //draw esp line
                 glLineWidth(2);
                 glBegin(GL_LINES);
-                glColor3f(1.0f, 0.0f, 1.0f);
-                //glVertex2f(0, -0.95f);
-                //glVertex2f(0.5f, 0.5f);
-                glVertex3f(0.0f, -0.95f, 0);
-                //glVertex3f(0.5f, 0.5f, -0.8f);
-                glVertex3f(zombieWTS.x/800-0.5, zombieWTS.y/600-0.5, 0);
-                //glVertex2f(zombieWTS2.x / 800, zombieWTS2.y / 600);
+                glColor3f(1.0f, 1.0f, 1.0f);
+                glVertex2f(0, -1.0f);
+                glVertex2f(zombieScreen.x/width, zombieScreen.y/height);
                 glEnd();
             }
         }
 
         std::cout << "there are " << zombieCount << " zombies" << std::endl;
-
-        //mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
-
-        //std::cout << mtx.matrix[0] << ", " << mtx.matrix[1] << std::endl;
-
-
-
-        ent zombie1 = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST));
-
-        std::cout << "ZOMBIE1 world to screen: " << WorldToScreen(zombie1.pos, mtx).toString() << std::endl;
-
-        //glLineWidth(2);
-        //glBegin(GL_LINES);
-        //glColor3f(0, 1.0f, 0);
-        //glVertex2f(0, 0);
-        //glVertex2f(0, 0.5f);
-        //glEnd();
 
 
         //actually render

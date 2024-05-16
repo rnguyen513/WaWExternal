@@ -8,6 +8,7 @@
 #include "Memory.h"
 #include "offests.h"
 #include <cstdlib>
+#include <GLFW/glfw3.h>
 
 using namespace extra;
 
@@ -17,9 +18,6 @@ int main()
 
     Sleep(1000);
 
-    //Dog myDawg("dawggie", 14);
-    //cout << myDawg.getName() << myDawg.getAge();
-    //cout << myDawg.getName() << " " << myDawg.getAge() << endl;
 
 
 
@@ -42,17 +40,40 @@ int main()
 
     Memory::Mem memoryController(openProc);
 
-    //INT8 health;
-    //INT8 ammo;
     int points;
-
     viewMatrix mtx;
+    viewMatrix_t mtx2;
+
+
+    //initialize glfw
+
+    GLFWwindow* window;
+
+    if (!glfwInit()) return -1;
+
+    //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+    glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, GLFW_TRUE);
+    glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
+    window = glfwCreateWindow(800,600, "Clear Sight", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    RECT windowPos;
 
     while (!GetAsyncKeyState(VK_ESCAPE)) {
 
-        //health = memoryController.RPM<INT8>((OFFSET_PLAYERBASEADDRESS+PLAYER_HEALTH_OFFSET));
+        //overlay window stuff
+        GetWindowRect(targetWindow, &windowPos);
+        glfwSetWindowPos(window, windowPos.left+3, windowPos.top+25);
+        //glfwSetWindowOpacity(window, 0.5f);
 
-        //cout << "player health: " << health;
+        glClear(GL_COLOR_BUFFER_BIT);
+
 
         points = memoryController.RPM<int>(base_address + OFFSET_POINTS);
 
@@ -62,6 +83,9 @@ int main()
         //entlist contains pointers to actual zombies
         //zombie1 = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST));
 
+        mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
+        mtx2 = memoryController.RPM<viewMatrix_t>(VWMATRIX);
+
         int zombieCount = 0;
         for (int i = 0; i < 24; i++) {
             ent zombie = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST + 0x88 * i));
@@ -69,16 +93,59 @@ int main()
                 zombieCount++;
                 std::cout << "zombie " << i << " health: " << zombie.health << ", position: "
                     << zombie.pos.toString() << std::endl;
+
+                Vector3 zombieWTS = WorldToScreen(zombie.pos, mtx);
+
+                std::cout << "ZOMBIE REGULAR VEC3: " << zombie.pos.toString() << std::endl;
+                std::cout << "ZOMBIEWTS: " << zombieWTS.toString() << std::endl;
+
+                Vector2 zombieWTS2 = WTS(zombie.pos, mtx2);
+                std::cout << "NEW WTS: " << zombieWTS2.x << ", " << zombieWTS2.y << std::endl;
+
+                if (zombieWTS.z < 0.01f) continue;
+
+                //draw esp line
+                glLineWidth(2);
+                glBegin(GL_LINES);
+                glColor3f(1.0f, 0.0f, 1.0f);
+                //glVertex2f(0, -0.95f);
+                //glVertex2f(0.5f, 0.5f);
+                glVertex3f(0.0f, -0.95f, 0);
+                //glVertex3f(0.5f, 0.5f, -0.8f);
+                glVertex3f(zombieWTS.x/800-0.5, zombieWTS.y/600-0.5, 0);
+                //glVertex2f(zombieWTS2.x / 800, zombieWTS2.y / 600);
+                glEnd();
             }
         }
 
         std::cout << "there are " << zombieCount << " zombies" << std::endl;
 
-        mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
+        //mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
 
-        std::cout << mtx.matrix[0].x << ", " << mtx.matrix[2].z << std::endl;
+        //std::cout << mtx.matrix[0] << ", " << mtx.matrix[1] << std::endl;
 
-        Sleep(1000);
+
+
+        ent zombie1 = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST));
+
+        std::cout << "ZOMBIE1 world to screen: " << WorldToScreen(zombie1.pos, mtx).toString() << std::endl;
+
+        //glLineWidth(2);
+        //glBegin(GL_LINES);
+        //glColor3f(0, 1.0f, 0);
+        //glVertex2f(0, 0);
+        //glVertex2f(0, 0.5f);
+        //glEnd();
+
+
+        //actually render
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
+        //Sleep(1);
         system("cls");
     }
+
+    glfwTerminate();
+    return 0;
 }

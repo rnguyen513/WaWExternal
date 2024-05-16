@@ -4,6 +4,10 @@
 #include <Windows.h>
 
 namespace extra {
+	struct Vector2 {
+		float x, y;
+	};
+
 	struct Vector3 {
 		float x, y, z;
 		std::string toString() const {
@@ -18,8 +22,14 @@ namespace extra {
 	};
 
 	struct viewMatrix {
-		Vector4 matrix[4];
+		float matrix[16];
 	};
+
+	struct viewMatrix_t {
+		float matrix[4][4];
+	};
+
+	Vector2 WTS(const Vector3& pos, const viewMatrix_t& mtx);
 
 	//struct Vector3 WorldToScreen(const struct Vector3 pos, struct viewMatrix matrix) {
 	//	struct Vector3 out;

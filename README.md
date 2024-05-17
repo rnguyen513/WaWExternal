@@ -5,11 +5,13 @@ Release .exe is /Release/ACRead.exe
 Originally used GLFW (OpenGL) but was having tons of issues drawing everything to the screen properly. Switched to GDI instead...
 
 ## Pros
-+consistent and accurate ESP with health and lines to target\n
++consistent and accurate ESP with health and lines to target
+
 +console monitor to track all living zombies and their position (disabled in release)
 
 ## Cons
--something wrong with OpenGL overlay, had to switch to GDI cuz simpler\n
+-something wrong with OpenGL overlay, had to switch to GDI cuz simpler
+
 -GDI graphics are flickery, especially when lots of entities
 
 ## Examples

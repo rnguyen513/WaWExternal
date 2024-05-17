@@ -34,7 +34,7 @@ namespace util {
 	void DrawFilledRect(int x, int y, int w, int h, HDC hdc, HBRUSH brush);
 	void DrawBoundingBox(int x, int y, int w, int h, HDC hdc, HBRUSH brush);
 	void DrawWithDoubleBuffering(HDC hdc, int width, int height, Memory::Mem memoryController, viewMatrix mtx, HPEN pen, HBRUSH brush);
-	void DrawZombies(Memory::Mem memoryController, viewMatrix mtx, int w, int h, HPEN pen, HBRUSH brush, HDC hdc);
+	void DrawZombies(Memory::Mem memoryController, viewMatrix mtx, int w, int h, HPEN pen, HBRUSH brush, HDC hdc, bool drawlines, bool boxes);
 
 	float Pythagorean2D(Vector2 a, Vector2 b);
 

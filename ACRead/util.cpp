@@ -36,7 +36,7 @@ namespace util {
 		DrawFilledRect(x+w, y, 2, h, hdc, brush); //right
 	}
 
-	void DrawWithDoubleBuffering(HDC hdc, int width, int height, Memory::Mem memoryController, viewMatrix mtx, HPEN pen, HBRUSH brush) {
+	void DrawWithDoubleBuffering(HDC hdc, int width, int height, Memory::Mem memoryController, viewMatrix mtx, HPEN pen, HBRUSH brush, bool drawlines, bool boxes) {
 		HDC bufferDC = CreateCompatibleDC(hdc);
 		HBITMAP bufferBitmap = CreateCompatibleBitmap(hdc, width, height);
 		SelectObject(bufferDC, bufferBitmap);
@@ -47,7 +47,7 @@ namespace util {
 		DeleteObject(_brush);
 
 		//draw zombies using new bufferDC
-		DrawZombies(memoryController, mtx, width, height, pen, brush, hdc);
+		DrawZombies(memoryController, mtx, width, height, pen, brush, hdc, drawlines, boxes);
 
 		BitBlt(hdc, 0, 0, width, height, bufferDC, 0, 0, SRCCOPY);
 
@@ -55,7 +55,7 @@ namespace util {
 		DeleteDC(bufferDC);
 	}
 
-	void DrawZombies(Memory::Mem memoryController, viewMatrix mtx, int w, int h, HPEN pen, HBRUSH brush, HDC hdc) {
+	void DrawZombies(Memory::Mem memoryController, viewMatrix mtx, int w, int h, HPEN pen, HBRUSH brush, HDC hdc, bool drawlines, bool boxes) {
 		int zombieCount = 0;
 		int zWidth = 0;
 		int zHeight = 0;
@@ -77,37 +77,39 @@ namespace util {
 
 
 
-				//get closest to crosshair
-				distance = Pythagorean2D({crosshair.x, crosshair.y}, headScreen);
-				if (distance < Pythagorean2D({crosshair.x, crosshair.y}, closest)) {
-					closest.x = headScreen.x;
-					closest.y = headScreen.y;
-					std::cout << "new closest: " << distance << std::endl;
+				////get closest to crosshair FOR AIMBOT
+				//distance = Pythagorean2D({crosshair.x, crosshair.y}, headScreen);
+				//if (distance < Pythagorean2D({crosshair.x, crosshair.y}, closest)) {
+				//	closest.x = headScreen.x;
+				//	closest.y = headScreen.y;
+				//	std::cout << "new closest: " << distance << std::endl;
+				//}
+
+				if (boxes) {
+					//calculate zombie dimensions
+					zHeight = headScreen.y - zombieScreen.y;
+					zWidth = zHeight / 2.4;
+
+					//DRAW BOX
+					brush = CreateSolidBrush(RGB(255, 0, 0));
+					SelectObject(hdc, brush);
+					DrawBoundingBox(zombieScreen.x - zWidth / 2, zombieScreen.y, zWidth, zHeight, hdc, brush);
+					DeleteObject(brush);
+
+					//DRAW HEALTH
+					brush = CreateSolidBrush(RGB(0, 155, 0));
+					SelectObject(hdc, brush);
+					DrawFilledRect(zombieScreen.x + zWidth * 0.5, zombieScreen.y, zWidth * 0.2, zHeight * zombie.health / zombie.maxHealth, hdc, brush);
+					DeleteObject(brush);
 				}
 
-
-				//DRAW JUST LINE
+				//draw lines if toggled
+				if (!drawlines) continue;
 				pen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
 				SelectObject(hdc, pen);
 				MoveToEx(hdc, w / 2, h - 40, nullptr);
 				LineTo(hdc, (int)zombieScreen.x, (int)zombieScreen.y);
 				DeleteObject(pen);
-
-				zHeight = headScreen.y - zombieScreen.y;
-				zWidth = zHeight / 2.4;
-
-
-				//DRAW BOX
-				brush = CreateSolidBrush(RGB(255,0,0));
-				SelectObject(hdc, brush);
-				DrawBoundingBox(zombieScreen.x-zWidth/2, zombieScreen.y, zWidth, zHeight, hdc, brush);
-				DeleteObject(brush);
-
-				//DRAW HEALTH
-				brush = CreateSolidBrush(RGB(0,155,0));
-				SelectObject(hdc, brush);
-				DrawFilledRect(zombieScreen.x + zWidth*0.5, zombieScreen.y, zWidth*0.2, zHeight * zombie.health / zombie.maxHealth, hdc, brush);
-				DeleteObject(brush);
 
 
 				////draw esp line

@@ -1,10 +1,2 @@
 ﻿  ACRead.cpp
-  util.cpp
-E:\proj\actrainerexternal\ACRead\util.cpp(22,41): warning C4244: '=': conversion from 'float' to 'long', possible loss of data
-E:\proj\actrainerexternal\ACRead\util.cpp(23,43): warning C4244: '=': conversion from 'float' to 'long', possible loss of data
-E:\proj\actrainerexternal\ACRead\util.cpp(97,22): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-E:\proj\actrainerexternal\ACRead\util.cpp(109,71): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-E:\proj\actrainerexternal\ACRead\util.cpp(109,35): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-E:\proj\actrainerexternal\ACRead\util.cpp(128,14): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-  Generating Code...
   ACRead.vcxproj -> E:\proj\actrainerexternal\Debug\ACRead.exe

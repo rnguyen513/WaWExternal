@@ -23,10 +23,18 @@ int main()
     Memory::Mem memoryController(L"Call of Duty®", L"CoDWaW.exe");          //all in one memory manager
 
     std::cout << "base address: " << memoryController.base_address << std::endl;
+    std::cout << "press B to toggle boxes, L to toggle lines" << std::endl;
+    std::cout << "press END to stop" << std::endl;
 
     //player variables
     int points;
     viewMatrix mtx;
+
+
+
+    //draw boxes/lines?
+    bool drawboxes = true;
+    bool drawlines = true;
 
 
     ////initialize glfw
@@ -47,7 +55,6 @@ int main()
     //glfwMakeContextCurrent(window);
 
     RECT windowPos;
-
     hdc = GetDC(memoryController.hwnd);
 
     while (!GetAsyncKeyState(VK_END)) {
@@ -74,7 +81,9 @@ int main()
         points = memoryController.RPM<int>(memoryController.base_address + OFFSET_POINTS);
         mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
 
-        DrawZombies(memoryController, mtx, width, height, pen, brush, hdc);
+        if (GetAsyncKeyState('L') & 0x8000) drawlines ^= true;
+        if (GetAsyncKeyState('B') & 0x8000) drawboxes ^= true;
+        DrawZombies(memoryController, mtx, width, height, pen, brush, hdc, drawlines, drawboxes);
 
     }
 

@@ -133,11 +133,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ACRead.cpp" />
-    <ClCompile Include="extra.cpp" />
+    <ClCompile Include="util.cpp" />
     <ClCompile Include="Memory.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="extra.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="offests.h" />
   </ItemGroup>

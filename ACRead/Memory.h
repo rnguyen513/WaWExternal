@@ -6,7 +6,11 @@ namespace Memory {
 	private:
 		HANDLE hProcess;
 	public:
-		Mem(HANDLE hProcess);
+		DWORD pid;
+		uintptr_t base_address;
+		HWND hwnd;
+
+		Mem(LPCWSTR windowName, LPCWSTR moduleName);
 
 		template <typename T> BOOL WPM(int BASE_ADDRESS, const T& buffer) {
 			SIZE_T bytez;
@@ -25,7 +29,5 @@ namespace Memory {
 	};
 
 	DWORD GetProcessId(const wchar_t* processName);
-
-	//uintptr_t GetModuleBaseAddress(DWORD procId, const wchar_t* modName);
 	uintptr_t GetModuleBaseAddress(DWORD dwPid, const wchar_t* moduleName);
 }

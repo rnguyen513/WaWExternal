@@ -18,7 +18,7 @@
     <ClCompile Include="ACRead.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="extra.cpp">
+    <ClCompile Include="util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Memory.cpp">
@@ -26,7 +26,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="extra.h">
+    <ClInclude Include="util.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="offests.h">

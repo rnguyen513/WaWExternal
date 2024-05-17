@@ -1,18 +1,16 @@
-//ACRead.cpp : This file contains the 'main' function. Program execution begins and ends there.
-
-
 #include <iostream>
 #include <Windows.h>
 #include <TlHelp32.h>
-#include "extra.h"
+#include "util.h"
 #include "Memory.h"
 #include "offests.h"
 #include <cstdlib>
 //#include <GLFW/glfw3.h>
 
-using namespace extra;
+using namespace util;
 
 HBRUSH brush;
+HPEN pen;
 HDC hdc;
 
 int main()
@@ -22,23 +20,12 @@ int main()
     Sleep(1000);
 
 
-    DWORD pid;                                                                  //get pid
-    HWND targetWindow = FindWindowW(NULL, L"Call of Duty®");
-    GetWindowThreadProcessId(targetWindow, &pid);
+    Memory::Mem memoryController(L"Call of Duty®", L"CoDWaW.exe");          //all in one memory manager
 
-    std::cout << pid << std::endl;
+    std::cout << "base address: " << memoryController.base_address << std::endl;
 
-
-
-    uintptr_t base_address;                                                     //get base address
-    base_address = Memory::GetModuleBaseAddress(pid, L"CoDWaW.exe");
-    std::cout << base_address << std::endl;
-    HANDLE openProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-
-
-    Memory::Mem memoryController(openProc);
-
-    int points;                                                                 //playervars
+    //player variables
+    int points;
     viewMatrix mtx;
 
 
@@ -61,59 +48,38 @@ int main()
 
     RECT windowPos;
 
+    hdc = GetDC(memoryController.hwnd);
+
     while (!GetAsyncKeyState(VK_END)) {
 
         //overlay window stuff
-        GetWindowRect(targetWindow, &windowPos);
+        GetWindowRect(memoryController.hwnd, &windowPos);
         //glfwSetWindowPos(window, windowPos.left, windowPos.top);
         int height = windowPos.bottom - windowPos.top;
         int width = windowPos.right - windowPos.left;
         //glfwSetWindowSize(window, width, height);
-
         //glfwSetWindowOpacity(window, 0.5f);
 
+
+        //CLEAR FRAME BEFORE RERENDER
         //glClear(GL_COLOR_BUFFER_BIT);
 
 
-        points = memoryController.RPM<int>(base_address + OFFSET_POINTS);
 
-        std::cout << "reading address: " << std::hex << "0x" << (base_address + OFFSET_POINTS);
-        std::cout << ", points: "<< std::dec << points << std::endl;
 
+        //gdi init
+        DeleteObject(hdc);
+        hdc = GetDC(memoryController.hwnd);
+
+        points = memoryController.RPM<int>(memoryController.base_address + OFFSET_POINTS);
         mtx = memoryController.RPM<viewMatrix>(VWMATRIX);
 
-        int zombieCount = 0;
-        for (int i = 0; i < 24; i++) {
-            ent zombie = memoryController.RPM<ent>(memoryController.RPM<uintptr_t>(base_address + OFFSET_ENTITY_LIST + 0x88 * i));
-            if (zombie.health > 0 && zombie.health < 50000 && zombie.health != 8304) {
-                zombieCount++;
-                std::cout << "zombie " << i << " health: " << zombie.health << ", position: "
-                    << zombie.pos.toString() << std::endl;
+        DrawZombies(memoryController, mtx, width, height, pen, brush, hdc);
 
-                Vector2 zombieScreen;
-                WorldToScreen(zombie.pos, zombieScreen, mtx.matrix, width, height);
-
-                ////draw esp line
-                //glLineWidth(2);
-                //glBegin(GL_LINES);
-                //glColor3f(1.0f, 1.0f, 1.0f);
-                //glVertex2f(0, -1.0f);
-                //glVertex2f(zombieScreen.x/width, zombieScreen.y/height);
-                //glEnd();
-            }
-        }
-
-        std::cout << "there are " << zombieCount << " zombies" << std::endl;
-
-
-        ////actually render
-        //glfwSwapBuffers(window);
-        //glfwPollEvents();
-
-        //Sleep(1);
-        system("cls");
     }
 
     //glfwTerminate();
+
+    ReleaseDC(memoryController.hwnd, hdc);
     return 0;
 }
